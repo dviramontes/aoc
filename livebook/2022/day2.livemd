@@ -42,15 +42,15 @@ defmodule RPS do
     s = Map.get(@rules, p2)
 
     case p do
-      {:A, :X} -> 3 + s
-      {:A, :Y} -> 6 + s
+      {:A, :X} -> s + 3
+      {:A, :Y} -> s + 6
       {:A, :Z} -> s
       # 
       {:B, :X} -> s
-      {:B, :Y} -> 3 + s
+      {:B, :Y} -> s + 3
       {:B, :Z} -> s + 6
       #
-      {:C, :X} -> 6 + s
+      {:C, :X} -> s + 6
       {:C, :Y} -> s
       {:C, :Z} -> s + 3
     end
@@ -67,13 +67,7 @@ C Z
 
 rounds =
   input
-  |> String.split("\n", trim: true)
-  |> Enum.map(&String.split(&1))
-  |> Enum.map(&Enum.map(&1, fn s -> String.to_atom(s) end))
-  |> Enum.map(&List.to_tuple/1)
-  |> Enum.reduce(0, fn x, acc ->
-    acc + RPS.play(x)
-  end)
+  |> RPS.game()
 
 rounds =
   input_text
@@ -81,13 +75,11 @@ rounds =
   |> RPS.game()
 ```
 
-```elixir
+run 1: 9965 # first run was off due to rules bug
 
-```
+run 2: 14297 # correct answer
 
-test 1: 9965
-
-## test
+## test 1
 
 ```elixir
 ExUnit.start(auto_run: false)
@@ -95,7 +87,7 @@ ExUnit.start(auto_run: false)
 defmodule RPSTest do
   use ExUnit.Case, async: false
 
-  test "rounds" do
+  test "rules" do
     assert 8 == RPS.play({:A, :Y})
     assert 1 == RPS.play({:B, :X})
     assert 6 == RPS.play({:C, :Z})
@@ -110,9 +102,102 @@ defmodule RPSTest do
              """
              |> RPS.game()
   end
+end
 
-  test "..." do
-    assert 9965 == input_text |> Kino.Input.read() |> RPS.game()
+ExUnit.run()
+```
+
+## part 2
+
+> The Elf finishes helping with the tent and sneaks back over to you. "Anyway, the second column says how the round needs to end: X means you need to lose, Y means you need to end the round in a draw, and Z means you need to win. Good luck!"
+
+The new rules are such that x,y,z now tell us how to play and a,b,c are the plays (rock, paper, scissors)
+
+```elixir
+defmodule RPS2 do
+  @rules %{
+    # loose
+    :X => 0,
+    # tie
+    :Y => 3,
+    # win
+    :Z => 6
+  }
+
+  def game("") do
+    0
+  end
+
+  def game(input) do
+    input
+    |> String.split("\n", trim: true)
+    |> Enum.map(&String.split(&1))
+    |> Enum.map(&Enum.map(&1, fn s -> String.to_atom(s) end))
+    |> Enum.map(&List.to_tuple/1)
+    |> Enum.reduce(0, fn x, acc ->
+      acc + RPS2.play(x)
+    end)
+  end
+
+  def play({_p1, p2} = p) do
+    s = Map.get(@rules, p2)
+
+    case p do
+      {:A, :X} -> s + 3
+      {:A, :Y} -> s + 1
+      {:A, :Z} -> s + 2
+      # 
+      {:B, :X} -> s + 1
+      {:B, :Y} -> s + 2
+      {:B, :Z} -> s + 3
+      #
+      {:C, :X} -> s + 2
+      {:C, :Y} -> s + 3
+      {:C, :Z} -> s + 1
+    end
+  end
+end
+```
+
+```elixir
+input = """
+A Y
+B X
+C Z
+"""
+
+rounds =
+  input
+  |> RPS2.game()
+
+rounds =
+  input_text
+  |> Kino.Input.read()
+  |> RPS2.game()
+```
+
+## test 2
+
+```elixir
+ExUnit.start(auto_run: false)
+
+defmodule RPSTest do
+  use ExUnit.Case, async: false
+
+  test "new rules" do
+    assert 4 == RPS2.play({:A, :Y})
+    assert 1 == RPS2.play({:B, :X})
+    assert 7 == RPS2.play({:C, :Z})
+  end
+
+  test "game" do
+    assert 12 ==
+             """
+             A Y
+             B X
+             C Z
+             """
+             |> RPS2.game()
   end
 end
 
