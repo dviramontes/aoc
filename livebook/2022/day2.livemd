@@ -1,0 +1,120 @@
+# day 2
+
+```elixir
+Mix.install([
+  {:kino, "~> 0.7.0"}
+])
+```
+
+## part 1
+
+```elixir
+input_text = Kino.Input.textarea("enter input text")
+```
+
+```elixir
+defmodule RPS do
+  @rules %{
+    # paper
+    :X => 1,
+    # rock
+    :Y => 2,
+    # scissors
+    :Z => 3
+  }
+
+  def game("") do
+    0
+  end
+
+  def game(input) do
+    input
+    |> String.split("\n", trim: true)
+    |> Enum.map(&String.split(&1))
+    |> Enum.map(&Enum.map(&1, fn s -> String.to_atom(s) end))
+    |> Enum.map(&List.to_tuple/1)
+    |> Enum.reduce(0, fn x, acc ->
+      acc + RPS.play(x)
+    end)
+  end
+
+  def play({_p1, p2} = p) do
+    s = Map.get(@rules, p2)
+
+    case p do
+      {:A, :X} -> 3 + s
+      {:A, :Y} -> 6 + s
+      {:A, :Z} -> s
+      # 
+      {:B, :X} -> s
+      {:B, :Y} -> 3 + s
+      {:B, :Z} -> s + 6
+      #
+      {:C, :X} -> 6 + s
+      {:C, :Y} -> s
+      {:C, :Z} -> s + 3
+    end
+  end
+end
+```
+
+```elixir
+input = """
+A Y
+B X
+C Z
+"""
+
+rounds =
+  input
+  |> String.split("\n", trim: true)
+  |> Enum.map(&String.split(&1))
+  |> Enum.map(&Enum.map(&1, fn s -> String.to_atom(s) end))
+  |> Enum.map(&List.to_tuple/1)
+  |> Enum.reduce(0, fn x, acc ->
+    acc + RPS.play(x)
+  end)
+
+rounds =
+  input_text
+  |> Kino.Input.read()
+  |> RPS.game()
+```
+
+```elixir
+
+```
+
+test 1: 9965
+
+## test
+
+```elixir
+ExUnit.start(auto_run: false)
+
+defmodule RPSTest do
+  use ExUnit.Case, async: false
+
+  test "rounds" do
+    assert 8 == RPS.play({:A, :Y})
+    assert 1 == RPS.play({:B, :X})
+    assert 6 == RPS.play({:C, :Z})
+  end
+
+  test "game" do
+    assert 20 ==
+             """
+             B Z
+             A X
+             C X
+             """
+             |> RPS.game()
+  end
+
+  test "..." do
+    assert 9965 == input_text |> Kino.Input.read() |> RPS.game()
+  end
+end
+
+ExUnit.run()
+```
