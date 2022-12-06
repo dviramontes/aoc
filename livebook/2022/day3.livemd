@@ -1,0 +1,97 @@
+# day 3
+
+```elixir
+Mix.install([
+  {:kino, "~> 0.8.0"}
+])
+```
+
+## setup
+
+## scratch
+
+```elixir
+az_lower_case =
+  ?a..?z
+  |> Enum.to_list()
+  |> List.to_string()
+  |> String.split("", trim: true)
+  |> Enum.with_index(fn e, i -> {e, i + 1} end)
+  |> Enum.into(%{})
+
+az_upper_case =
+  ?A..?Z
+  |> Enum.to_list()
+  |> List.to_string()
+  |> String.split("", trim: true)
+  |> Enum.with_index(fn e, i -> {e, i + 1} end)
+  |> Enum.into(%{})
+```
+
+```elixir
+test_input = """
+vJrwpWtwJgWrhcsFMMfFFhFp
+jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
+PmmdzqPrVvPwwTWBwg
+wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn
+ttgJtRGJQctTZtZT
+CrZsJsPPZsGzwwsLwLmpwMDw
+"""
+
+sacks =
+  test_input
+  |> String.split("\n")
+
+sack = List.first(sacks)
+
+items =
+  sack
+  |> String.split("", trim: true)
+
+{sack_a, sack_b} =
+  items
+  |> Enum.split(div(length(items), 2))
+  |> IO.inspect()
+
+Enum.zip_reduce(sack_a, sack_b, 0, fn a, b, acc ->
+  upper = Map.get(az_lower_case, a, 0)
+  lower = Map.get(az_upper_case, b, 0)
+  found_a = Enum.find(sack_b, &Enum.member?(&1, a))
+  found_b = Enum.find(sack_a, fn aa -> aa == b end)
+
+  r =
+    if found_a do
+      upper
+    else
+      0
+    end
+
+  s =
+    if found_b do
+      r + lower
+    else
+      0
+    end
+
+  acc + s
+end)
+
+# |> Enum.to_list()
+# |> Enum.reject(fn {_e, i} -> i < 2 end)
+# |> IO.inspect()
+# |> Enum.reduce(0, fn {e, _i}, acc -> 
+#   upper = Map.get(az_lower_case, e, 0) |> IO.inspect(label: "#{e}")
+#   lower = Map.get(az_upper_case, e, 0) |> IO.inspect(label: "#{e}")
+
+#   acc + upper + lower
+# end)
+```
+
+## part 1
+
+```elixir
+defmodule SackOrg do
+end
+```
+
+## test 1
