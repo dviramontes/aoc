@@ -134,3 +134,101 @@ end
 
 ExUnit.run()
 ```
+
+## part 2
+
+```elixir
+defmodule P2 do
+  defguard triple_list(a, b, c) when is_list(a) and is_list(b) and is_list(c)
+  defguard double_map(a, b) when is_map(a) and is_map(b)
+
+  def sum(items) do
+    az_lower_case = alpha_range(?a..?z, 1)
+    az_upper_case = alpha_range(?A..?Z, 27)
+
+    items
+    |> Enum.reduce(0, fn i, acc ->
+      l = Map.get(az_lower_case, i, 0)
+      u = Map.get(az_upper_case, i, 0)
+
+      acc + l + u
+    end)
+  end
+
+  def parse(input_str) do
+    sacks =
+      input_str
+      |> String.split("\n", trim: true)
+      |> Enum.chunk_every(3)
+
+    sacks
+    |> Enum.map(fn b -> process_line(b) end)
+    |> Enum.sum()
+  end
+
+  defp process_line(group) do
+    lines =
+      group
+      |> Enum.map(fn s -> String.split(s, "", trim: true) end)
+
+    [l, m, r] = lines
+
+    intersect(l, m, r)
+    |> sum()
+  end
+
+  defp intersect(a, b, c) when triple_list(a, b, c) do
+    ab = a ++ b
+    intersect(MapSet.new(ab), MapSet.new(c))
+  end
+
+  defp intersect(a, b) when double_map(a, b) do
+    MapSet.intersection(a, b)
+    |> Enum.into([])
+  end
+
+  defp alpha_range(range, offset) do
+    range
+    |> Enum.to_list()
+    |> List.to_string()
+    |> String.split("", trim: true)
+    |> Enum.with_index(fn e, i -> {e, i + offset} end)
+    |> Enum.into(%{})
+  end
+end
+
+"""
+vJrwpWtwJgWrhcsFMMfFFhFp
+jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
+PmmdzqPrVvPwwTWBwg
+wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn
+ttgJtRGJQctTZtZT
+CrZsJsPPZsGzwwsLwLmpwMDw
+"""
+|> P2.parse()
+```
+
+## test 2
+
+```elixir
+ExUnit.start(auto_run: false)
+
+defmodule P1Test do
+  use ExUnit.Case, async: false
+
+  test "parse" do
+    assert 70 ==
+             """
+             vJrwpWtwJgWrhcsFMMfFFhFp
+             jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
+             PmmdzqPrVvPwwTWBwg
+             wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn
+             ttgJtRGJQctTZtZT
+             CrZsJsPPZsGzwwsLwLmpwMDw
+             """
+             |> P2.parse()
+  end
+end
+
+ExUnit.run()
+```
