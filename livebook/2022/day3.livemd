@@ -139,7 +139,7 @@ ExUnit.run()
 
 ```elixir
 defmodule P2 do
-  defguard triple_list(a, b, c) when is_list(a) and is_list(b) and is_list(c)
+  defguard double_list(a, b) when is_list(a) and is_list(b)
   defguard double_map(a, b) when is_map(a) and is_map(b)
 
   def sum(items) do
@@ -171,18 +171,20 @@ defmodule P2 do
       group
       |> Enum.map(fn s -> String.split(s, "", trim: true) end)
 
-    [l, m, r] = lines
+    [a, b, c] = lines
 
-    intersect(l, m, r)
-    |> sum()
+    ab = diff(a, b) |> sum()
+    ac = diff(a, c) |> sum()
+    bc = diff(b, c) |> sum()
+    dbg()
+    ab + ac + bc
   end
 
-  defp intersect(a, b, c) when triple_list(a, b, c) do
-    ab = a ++ b
-    intersect(MapSet.new(ab), MapSet.new(c))
+  defp diff(a, b) when double_list(a, b) do
+    diff(MapSet.new(a), MapSet.new(b))
   end
 
-  defp intersect(a, b) when double_map(a, b) do
+  defp diff(a, b) when double_map(a, b) do
     MapSet.intersection(a, b)
     |> Enum.into([])
   end
