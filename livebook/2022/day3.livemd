@@ -173,18 +173,17 @@ defmodule P2 do
 
     [a, b, c] = lines
 
-    ab = diff(a, b) |> sum()
-    ac = diff(a, c) |> sum()
-    bc = diff(b, c) |> sum()
-    dbg()
-    ab + ac + bc
+    ab = inter(a, b)
+    ac = inter(a, c)
+
+    inter(ab, ac) |> sum()
   end
 
-  defp diff(a, b) when double_list(a, b) do
-    diff(MapSet.new(a), MapSet.new(b))
+  def inter(a, b) when double_list(a, b) do
+    inter(MapSet.new(a), MapSet.new(b))
   end
 
-  defp diff(a, b) when double_map(a, b) do
+  def inter(a, b) when double_map(a, b) do
     MapSet.intersection(a, b)
     |> Enum.into([])
   end
@@ -199,6 +198,76 @@ defmodule P2 do
   end
 end
 
+a = ["P", "m", "m", "d", "z", "q", "P", "r", "V", "v", "P", "w", "w", "T", "W", "B", "w", "g"]
+
+b = [
+  "j",
+  "q",
+  "H",
+  "R",
+  "N",
+  "q",
+  "R",
+  "j",
+  "q",
+  "z",
+  "j",
+  "G",
+  "D",
+  "L",
+  "G",
+  "L",
+  "r",
+  "s",
+  "F",
+  "M",
+  "f",
+  "F",
+  "Z",
+  "S",
+  "r",
+  "L",
+  "r",
+  "F",
+  "Z",
+  "s",
+  "S",
+  "L"
+]
+
+c = [
+  "v",
+  "J",
+  "r",
+  "w",
+  "p",
+  "W",
+  "t",
+  "w",
+  "J",
+  "g",
+  "W",
+  "r",
+  "h",
+  "c",
+  "s",
+  "F",
+  "M",
+  "M",
+  "f",
+  "F",
+  "F",
+  "h",
+  "F",
+  "p"
+]
+
+ab = P2.inter(a, b)
+ac = P2.inter(a, c)
+
+# intersection of ab + ac 
+P2.inter(ab, ac)
+
 """
 vJrwpWtwJgWrhcsFMMfFFhFp
 jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
@@ -208,7 +277,15 @@ ttgJtRGJQctTZtZT
 CrZsJsPPZsGzwwsLwLmpwMDw
 """
 |> P2.parse()
+
+input
+|> Kino.Input.read()
+|> P2.parse()
 ```
+
+I asked ChatGPT to explain intesersection sets to me :)
+
+> In set theory, an intersection is a combination of two or more sets that contains only the elements that are common to all of the sets. For example, if you have the sets A = {1, 2, 3} and B = {2, 3, 4}, the intersection of these sets would be the set C = {2, 3}. This is because the set C contains only the elements that are common to both set A and set B. In other words, the intersection of two sets is the set of elements that belong to both sets.
 
 ## test 2
 
