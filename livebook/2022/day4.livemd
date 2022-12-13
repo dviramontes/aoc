@@ -1,0 +1,80 @@
+# day 4
+
+```elixir
+Mix.install([
+  {:kino, "~> 0.8.0"}
+])
+```
+
+## part 1
+
+```elixir
+input = Kino.Input.textarea("paste input")
+```
+
+```elixir
+test_input = """
+2-4,6-8
+2-3,4-5
+5-7,7-9
+2-8,3-7
+6-6,4-6
+2-6,4-8
+"""
+```
+
+```elixir
+defmodule P1 do
+  def parse(input_str) do
+    input_str
+    |> String.split("\n", trim: true)
+    |> Enum.map(&String.split(&1, ","))
+    |> Enum.map(&parse_section/1)
+  end
+
+  def parse_section(sections) do
+    sections
+    |> Enum.map(fn section_str ->
+      section_str
+      |> String.split("-", trim: true)
+      |> Enum.map(&String.to_integer/1)
+      |> List.to_tuple()
+    end)
+  end
+
+  def calc(pairs) do
+    pairs
+    |> Enum.reduce(0, fn [{a, b}, {c, d}], acc ->
+      r1 = a..b
+      r2 = c..d
+
+      if (Enum.member?(r2, a) and Enum.member?(r2, b)) or
+           (Enum.member?(r1, c) and Enum.member?(r1, d)) do
+        1 + acc
+      else
+        acc
+      end
+    end)
+  end
+end
+
+test_input
+|> P1.parse()
+|> P1.calc()
+
+input
+|> Kino.Input.read()
+|> P1.parse()
+|> P1.calc()
+```
+
+Scratchpad
+
+```elixir
+a = 1
+b = 4
+1..4 |> Enum.member?(3)
+a..b |> Enum.member?(3)
+
+1..10 |> Enum.member?(2..4)
+```
