@@ -24,7 +24,7 @@ test_input = """
 ```
 
 ```elixir
-defmodule P1 do
+defmodule P0 do
   def parse(input_str) do
     input_str
     |> String.split("\n", trim: true)
@@ -41,7 +41,9 @@ defmodule P1 do
       |> List.to_tuple()
     end)
   end
+end
 
+defmodule P1 do
   def calc(pairs) do
     pairs
     |> Enum.reduce(0, fn [{a, b}, {c, d}], acc ->
@@ -59,12 +61,12 @@ defmodule P1 do
 end
 
 test_input
-|> P1.parse()
+|> P0.parse()
 |> P1.calc()
 
 input
 |> Kino.Input.read()
-|> P1.parse()
+|> P0.parse()
 |> P1.calc()
 ```
 
@@ -75,6 +77,94 @@ a = 1
 b = 4
 1..4 |> Enum.member?(3)
 a..b |> Enum.member?(3)
-
 1..10 |> Enum.member?(2..4)
+```
+
+## test 1
+
+```elixir
+ExUnit.start(auto_run: false)
+
+defmodule P1Test do
+  use ExUnit.Case, async: false
+
+  test "calc" do
+    assert """
+           2-4,6-8
+           2-3,4-5
+           5-7,7-9
+           2-8,3-7
+           6-6,4-6
+           2-6,4-8
+           """
+           |> P0.parse()
+           |> P1.calc() == 2
+  end
+end
+
+ExUnit.run()
+```
+
+## part 2
+
+```elixir
+defmodule P2 do
+  def calc(pairs) do
+    pairs
+    |> Enum.reduce(0, fn [{a, b}, {c, d}], acc ->
+      r1 = a..b
+      r2 = c..d
+
+      if Enum.member?(r2, a) or
+           (Enum.member?(r2, b) and
+              Enum.member?(r1, c)) or Enum.member?(r1, d) do
+        1 + acc
+      else
+        acc
+      end
+    end)
+  end
+end
+
+test_input
+|> P0.parse()
+|> P2.calc()
+
+input
+|> Kino.Input.read()
+|> P0.parse()
+|> P2.calc()
+```
+
+## test 2
+
+```elixir
+ExUnit.start(auto_run: false)
+
+defmodule P2Test do
+  use ExUnit.Case, async: false
+
+  test "calc" do
+    assert """
+           2-4,6-8
+           2-3,4-5
+           5-7,7-9
+           """
+           |> P0.parse()
+           |> P2.calc() == 1
+
+    assert """
+           2-4,6-8
+           2-3,4-5
+           5-7,7-9
+           2-8,3-7
+           6-6,4-6
+           2-6,4-8
+           """
+           |> P0.parse()
+           |> P2.calc() == 4
+  end
+end
+
+ExUnit.run()
 ```
