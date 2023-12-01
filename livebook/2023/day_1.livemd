@@ -1,0 +1,102 @@
+# Day 1
+
+```elixir
+Mix.install([
+  {:kino_aoc, "~> 0.1"}
+])
+```
+
+## Input
+
+<!-- livebook:{"attrs":{"assign_to":"puzzle_input","day":"1","session_secret":"AOC_SESSION","year":"2023"},"chunks":null,"kind":"Elixir.KinoAOC.HelperCell","livebook_object":"smart_cell"} -->
+
+```elixir
+{:ok, puzzle_input} =
+  KinoAOC.download_puzzle("2023", "1", System.fetch_env!("LB_AOC_SESSION"))
+```
+
+```elixir
+{:ok, puzzle_input} =
+  KinoAOC.download_puzzle("2022", "1", System.fetch_env!("LB_AOC_SESSION"))
+```
+
+## Parser
+
+```elixir
+defmodule Parser do
+  def parse(input) do
+    nums =
+      Regex.scan(~r/\d+/, input)
+      |> List.flatten()
+
+    first = List.first(nums)
+    last = List.last(nums)
+    (first <> last) |> String.to_integer()
+  end
+end
+```
+
+## Test Parser
+
+```elixir
+ExUnit.start(autorun: false)
+
+defmodule ParserTest do
+  use ExUnit.Case, async: true
+  import Parser
+
+  @input "1abc2"
+  @expected 12
+
+  test "parse test" do
+    actual = parse(@input)
+    assert actual == @expected
+  end
+end
+
+ExUnit.run()
+```
+
+## Part 1
+
+```elixir
+defmodule PartOne do
+  def solve(input) do
+    IO.puts("--- Part One ---")
+    IO.puts("Result: #{run(input)}")
+  end
+
+  def run(input) do
+    input
+    |> String.split("\n")
+    |> dbg()
+  end
+end
+```
+
+## Test Part 1
+
+```elixir
+ExUnit.start(autorun: false)
+
+defmodule PartOneTest do
+  use ExUnit.Case, async: true
+  import PartOne
+
+  @input puzzle_input
+  @expected 22
+
+  test "part one" do
+    actual = run(@input)
+    assert actual == @expected
+  end
+end
+
+ExUnit.run()
+```
+
+```elixir
+PartOne.solve(puzzle_input)
+```
+
+<!-- livebook:{"offset":1551,"stamp":{"token":"XCP.w1lIJkZ8mhghMUnnyUhcgRrIQACzPnqtCH_mu5HMRJZI4tmrr-ywSKfD_T1h6KoBqh5HckcufLpyRpokQANgP56en_YVhI0jBKOs_x-KPawDr5ur3Tw","version":2}} -->
