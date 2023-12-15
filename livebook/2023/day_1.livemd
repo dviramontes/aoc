@@ -15,15 +15,22 @@ Mix.install([
   KinoAOC.download_puzzle("2023", "1", System.fetch_env!("LB_AOC_SESSION"))
 ```
 
-```elixir
-{:ok, puzzle_input} =
-  KinoAOC.download_puzzle("2023", "1", System.fetch_env!("LB_AOC_SESSION"))
-```
-
 ## Parser
 
 ```elixir
 defmodule Parser do
+  @num_dict %{
+    "one" => "1",
+    "two" => "2",
+    "three" => "3",
+    "four" => "4",
+    "five" => "5",
+    "six" => "6",
+    "seven" => "7",
+    "eight" => "8",
+    "nine" => "9"
+  }
+
   def parse(input) do
     nums =
       Regex.scan(~r/\d/, input)
@@ -32,7 +39,66 @@ defmodule Parser do
     (List.first(nums) <> List.last(nums))
     |> String.to_integer()
   end
+
+  def parse2(input) do
+    num_digits =
+      first_and_last(input)
+      |> IO.inspect()
+
+    word_digits =
+      ~r/(?<digit>(\d))|(?<digit_name>(one)|(two)|(three)|(four)|(five)|(six)|(seven)|(eight)|(nine))/
+      |> Regex.scan(input)
+      |> List.flatten()
+
+    case length(num_digits) do
+      2 ->
+        List.first(num_digits) <> List.last(num_digits)
+
+      1 ->
+        List.first(num_digits) <> Map.get(@num_dict, List.last(word_digits))
+
+      _ ->
+        Map.get(@num_dict, List.first(word_digits)) <> Map.get(@num_dict, List.last(word_digits))
+    end
+    |> String.to_integer()
+  end
+
+  def first_and_last(string) do
+    <<first::binary-1, _mid::binary-size(byte_size(string) - 2), last::binary-1>> = string
+
+    [first, last]
+    |> Enum.map(&Regex.scan(~r/\d/, &1))
+    |> List.flatten()
+    |> Enum.reverse()
+  end
 end
+
+a = """
+two1nine
+eightwothree
+abcone2threexyz
+xtwone3four
+4nineeightseven2
+zoneight234
+7pqrstsixteen
+"""
+
+b = "7pqrstsixteen"
+
+# 29, 83, 13, 24, 42, 14, and 76.
+
+# b
+# |> String.split("\n", trim: true)
+# |> Enum.map(&String.trim/1)
+# |> Enum.map(&Parser.parse2/1)
+# |> IO.inspect(charlists: :as_lists)
+
+Regex.run(
+  ~r/(?<digit>(\d))|(?<digit_name>(one)|(two)|(three)|(four)|(five)|(six)|(seven)|(eight)|(nine))/,
+  b,
+  return: :index,
+  capture: :first
+)
 ```
 
 ## Test Parser
@@ -100,3 +166,13 @@ ExUnit.run()
 ```elixir
 PartOne.solve(puzzle_input)
 ```
+
+## Part 2
+
+```elixir
+
+```
+
+## Test Part 2
+
+<!-- livebook:{"offset":3021,"stamp":{"token":"XCP.ZKZv_RgVMD-0I_GbapJLxgsZ0GMfoPhHdDLPELXLRdYd73BESxtG8BaDytJXBtaydSOJ44ogILDdG9PjxaTyckarFgPieBbsrR-ft0YgyMvO4id1SeU","version":2}} -->
