@@ -17,7 +17,7 @@ Mix.install([
 
 ```elixir
 {:ok, puzzle_input} =
-  KinoAOC.download_puzzle("2022", "1", System.fetch_env!("LB_AOC_SESSION"))
+  KinoAOC.download_puzzle("2023", "1", System.fetch_env!("LB_AOC_SESSION"))
 ```
 
 ## Parser
@@ -26,12 +26,11 @@ Mix.install([
 defmodule Parser do
   def parse(input) do
     nums =
-      Regex.scan(~r/\d+/, input)
+      Regex.scan(~r/\d/, input)
       |> List.flatten()
 
-    first = List.first(nums)
-    last = List.last(nums)
-    (first <> last) |> String.to_integer()
+    (List.first(nums) <> List.last(nums))
+    |> String.to_integer()
   end
 end
 ```
@@ -68,8 +67,10 @@ defmodule PartOne do
 
   def run(input) do
     input
-    |> String.split("\n")
-    |> dbg()
+    |> String.split("\n", trim: true)
+    |> Enum.map(&String.trim/1)
+    |> Enum.map(&Parser.parse/1)
+    |> Enum.sum()
   end
 end
 ```
@@ -84,7 +85,8 @@ defmodule PartOneTest do
   import PartOne
 
   @input puzzle_input
-  @expected 22
+
+  @expected 55477
 
   test "part one" do
     actual = run(@input)
@@ -98,5 +100,3 @@ ExUnit.run()
 ```elixir
 PartOne.solve(puzzle_input)
 ```
-
-<!-- livebook:{"offset":1551,"stamp":{"token":"XCP.w1lIJkZ8mhghMUnnyUhcgRrIQACzPnqtCH_mu5HMRJZI4tmrr-ywSKfD_T1h6KoBqh5HckcufLpyRpokQANgP56en_YVhI0jBKOs_x-KPawDr5ur3Tw","version":2}} -->
