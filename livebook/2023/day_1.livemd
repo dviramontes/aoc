@@ -19,6 +19,10 @@ Mix.install([
 
 ```elixir
 defmodule Parser do
+  @regex1 ~r/\d/
+  # credit https://github.com/Lakret/aoc2023/blob/main/d01.livemd
+  @regex2 ~r/(?<digit>(\d))|(?<digit_name>(one)|(two)|(three)|(four)|(five)|(six)|(seven)|(eight)|(nine))/
+
   @num_dict %{
     "one" => "1",
     "two" => "2",
@@ -33,72 +37,55 @@ defmodule Parser do
 
   def parse(input) do
     nums =
-      Regex.scan(~r/\d/, input)
+      Regex.scan(@regex1, input)
       |> List.flatten()
 
     (List.first(nums) <> List.last(nums))
     |> String.to_integer()
   end
 
-  def parse2(input) do
-    num_digits =
-      first_and_last(input)
-      |> IO.inspect()
+  def parse_two(input) do
+    matches =
+      scan_with_overlaps(input, [])
+      |> Enum.map(&to_digit/1)
 
-    word_digits =
-      ~r/(?<digit>(\d))|(?<digit_name>(one)|(two)|(three)|(four)|(five)|(six)|(seven)|(eight)|(nine))/
-      |> Regex.scan(input)
-      |> List.flatten()
-
-    case length(num_digits) do
-      2 ->
-        List.first(num_digits) <> List.last(num_digits)
-
-      1 ->
-        List.first(num_digits) <> Map.get(@num_dict, List.last(word_digits))
-
-      _ ->
-        Map.get(@num_dict, List.first(word_digits)) <> Map.get(@num_dict, List.last(word_digits))
-    end
+    (hd(matches) <> List.last(matches))
     |> String.to_integer()
   end
 
-  def first_and_last(string) do
-    <<first::binary-1, _mid::binary-size(byte_size(string) - 2), last::binary-1>> = string
+  defp scan_with_overlaps(input, []) when is_binary(input) do
+    scan_with_overlaps(
+      input,
+      Regex.run(
+        @regex2,
+        input,
+        return: :index,
+        capture: :first
+      ),
+      []
+    )
+  end
 
-    [first, last]
-    |> Enum.map(&Regex.scan(~r/\d/, &1))
-    |> List.flatten()
-    |> Enum.reverse()
+  defp scan_with_overlaps(input, [{index, length}], matches) do
+    scan_with_overlaps(
+      input,
+      Regex.run(
+        @regex2,
+        input,
+        return: :index,
+        capture: :first,
+        offset: index + 1
+      ),
+      [String.slice(input, index, length) | matches]
+    )
+  end
+
+  defp scan_with_overlaps(_input, nil, matches), do: Enum.reverse(matches)
+
+  defp to_digit(digit) do
+    Map.get(@num_dict, digit, digit)
   end
 end
-
-a = """
-two1nine
-eightwothree
-abcone2threexyz
-xtwone3four
-4nineeightseven2
-zoneight234
-7pqrstsixteen
-"""
-
-b = "7pqrstsixteen"
-
-# 29, 83, 13, 24, 42, 14, and 76.
-
-# b
-# |> String.split("\n", trim: true)
-# |> Enum.map(&String.trim/1)
-# |> Enum.map(&Parser.parse2/1)
-# |> IO.inspect(charlists: :as_lists)
-
-Regex.run(
-  ~r/(?<digit>(\d))|(?<digit_name>(one)|(two)|(three)|(four)|(five)|(six)|(seven)|(eight)|(nine))/,
-  b,
-  return: :index,
-  capture: :first
-)
 ```
 
 ## Test Parser
@@ -170,9 +157,41 @@ PartOne.solve(puzzle_input)
 ## Part 2
 
 ```elixir
+defmodule PartTwo do
+  def solve(input) do
+    IO.puts("--- Part One ---")
+    IO.puts("Result: #{run(input)}")
+  end
 
+  def run(input) do
+    input
+    |> String.split("\n", trim: true)
+    |> Enum.map(&String.trim/1)
+    |> Enum.map(&Parser.parse_two/1)
+    |> Enum.sum()
+  end
+end
 ```
 
 ## Test Part 2
 
-<!-- livebook:{"offset":3021,"stamp":{"token":"XCP.ZKZv_RgVMD-0I_GbapJLxgsZ0GMfoPhHdDLPELXLRdYd73BESxtG8BaDytJXBtaydSOJ44ogILDdG9PjxaTyckarFgPieBbsrR-ft0YgyMvO4id1SeU","version":2}} -->
+```elixir
+ExUnit.start(autorun: false)
+
+defmodule PartTwoTest do
+  use ExUnit.Case, async: true
+  import PartTwo
+
+  @input puzzle_input
+  @expected 54431
+
+  test "part two" do
+    actual = run(@input)
+    assert actual == @expected
+  end
+end
+
+ExUnit.run()
+```
+
+<!-- livebook:{"offset":3317,"stamp":{"token":"XCP.tkST5awSgcthxn7xP7BKr6zgsZpmvcDp9Zh4iobYMIt7-ACv093P3MCLWf8PNP6kSVbxzj2AwxVYY5JSSu4FGY6PRnjDS-Kbf1wxTcykc35XpWrzA8o","version":2}} -->
