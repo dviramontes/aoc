@@ -1,0 +1,197 @@
+# Day 8
+
+```elixir
+Mix.install([
+  {:kino_aoc, "~> 0.1"}
+])
+```
+
+## Input
+
+<!-- livebook:{"attrs":{"assign_to":"puzzle_input","day":"8","session_secret":"AOC_SESSION","year":"2023"},"chunks":null,"kind":"Elixir.KinoAOC.HelperCell","livebook_object":"smart_cell"} -->
+
+```elixir
+{:ok, puzzle_input} =
+  KinoAOC.download_puzzle("2023", "8", System.fetch_env!("LB_AOC_SESSION"))
+```
+
+```elixir
+test_input = """
+RL
+
+AAA = (BBB, CCC)
+BBB = (DDD, EEE)
+CCC = (ZZZ, GGG)
+DDD = (DDD, DDD)
+EEE = (EEE, EEE)
+GGG = (GGG, GGG)
+ZZZ = (ZZZ, ZZZ)
+"""
+```
+
+```elixir
+"(test)"
+|> String.slice(1..-2)
+```
+
+## Parser
+
+```elixir
+defmodule Parser do
+  def parse(input) do
+    [turns, nodes] = String.split(input, "\n\n")
+
+    steps =
+      turns
+      |> String.graphemes()
+      |> Enum.map(fn direction ->
+        case direction do
+          "L" -> 0
+          "R" -> 1
+        end
+      end)
+
+    network =
+      nodes
+      |> String.split("\n", trim: true)
+      |> Enum.map(&String.split(&1, " = "))
+      |> Enum.map(fn [step, coordites] = _line ->
+        {step, coordites |> String.slice(1..-2) |> String.split(", ")}
+      end)
+      |> Enum.into(%{})
+
+    _walk =
+      network
+      |> Enum.reduce({0, steps}, fn
+        {"ZZZ", [_left, _right]}, acc ->
+          acc
+        {"AAA", [left, right]}, {counter, [step | rest]} = _acc ->
+            
+          {1, }
+        {step, [left, right]}, {counter, [step | rest]} = _acc ->
+          Map.get(network, )
+          {counter + 1, rest}
+      end)
+  end
+end
+
+Parser.parse(test_input)
+```
+
+## Test Parser
+
+```elixir
+ExUnit.start(autorun: false)
+
+defmodule ParserTest do
+  use ExUnit.Case, async: true
+  import Parser
+  @expected 2
+
+  test "parse test" do
+    test_input = """
+    RL
+
+    AAA = (BBB, CCC)
+    BBB = (DDD, EEE)
+    CCC = (ZZZ, GGG)
+    DDD = (DDD, DDD)
+    EEE = (EEE, EEE)
+    GGG = (GGG, GGG)
+    ZZZ = (ZZZ, ZZZ)
+    """
+
+    actual = parse(test_input)
+    assert actual == @expected
+  end
+end
+
+ExUnit.run()
+```
+
+## Part 1
+
+```elixir
+defmodule PartOne do
+  def solve(input) do
+    IO.puts("--- Part One ---")
+    IO.puts("Result: #{run(input)}")
+  end
+
+  def run(input) do
+    input
+    |> String.split("\n", trim: true)
+    |> Enum.map(&String.trim/1)
+    |> Enum.map(&Parser.parse/1)
+    |> Enum.sum()
+  end
+end
+```
+
+## Test Part 1
+
+```elixir
+ExUnit.start(autorun: false)
+
+defmodule PartOneTest do
+  use ExUnit.Case, async: true
+  import PartOne
+
+  @input puzzle_input
+
+  @expected 55477
+
+  test "part one" do
+    actual = run(@input)
+    assert actual == @expected
+  end
+end
+
+ExUnit.run()
+```
+
+```elixir
+PartOne.solve(puzzle_input)
+```
+
+## Part 2
+
+```elixir
+defmodule PartTwo do
+  def solve(input) do
+    IO.puts("--- Part One ---")
+    IO.puts("Result: #{run(input)}")
+  end
+
+  def run(input) do
+    input
+    |> String.split("\n", trim: true)
+    |> Enum.map(&String.trim/1)
+    |> Enum.map(&Parser.parse_two/1)
+    |> Enum.sum()
+  end
+end
+```
+
+## Test Part 2
+
+```elixir
+ExUnit.start(autorun: false)
+
+defmodule PartTwoTest do
+  use ExUnit.Case, async: true
+  import PartTwo
+
+  @input puzzle_input
+  @expected 54431
+
+  test "part two" do
+    actual = run(@input)
+    assert actual == @expected
+  end
+end
+
+ExUnit.run()
+```
+
+<!-- livebook:{"offset":3185,"stamp":{"token":"XCP.OLr3KeJ2gbtb-2W2wpYRNeIbrTvXFiquRK67ygzaNfvDsV4KePQJoYdatMpqi54ri0zNrig9MYu5DkWNgZa3x4dJHcgaGgi-FE4rwy0tG1xSgKw1Mz4","version":2}} -->
