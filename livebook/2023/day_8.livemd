@@ -39,43 +39,38 @@ ZZZ = (ZZZ, ZZZ)
 ```elixir
 defmodule Part1 do
   def parse(input) do
-    [instructions, nodes] = String.split(input, "\n\n")
-
-    instructions =
-      instructions
-      |> String.graphemes()
-      |> Enum.map(fn direction ->
-        case direction do
-          "L" -> 0
-          "R" -> 1
-        end
-      end)
+    [steps, nodes] = String.split(input, "\n\n")
 
     network =
       nodes
       |> String.split("\n", trim: true)
       |> Enum.map(&String.split(&1, " = "))
       |> Enum.map(fn [step, coordites] ->
-        {step, coordites |> String.slice(1..-2) |> String.split(", ")}
+        [left, right] = coordites |> String.slice(1..-2) |> String.split(", ")
+        {step, %{left: left, right: right}}
       end)
       |> Enum.into(%{})
 
-    {instructions, network}
-  end
-
-  def walk(_instructions, _network, [], "FFF", count), do: count
-
-  def walk(_instructions, _network, [], key, ) do
-    
+    {String.graphemes(steps), network}
   end
 
   def run(input) do
-    {instructions, network} = parse(input)
-    walk(instructions, network, [], "AAA", 0)
+    {steps, network} = parse(input)
+
+    Stream.cycle(steps)
+    |> Enum.reduce_while({"AAA", 0}, fn move, {pos, step_counter} = _acc ->
+      pos = walk(network, pos, move)
+      step_counter = step_counter + 1
+
+      if pos == "ZZZ", do: {:halt, step_counter}, else: {:cont, {pos, step_counter}}
+    end)
   end
+
+  defp walk(network, pos, "L"), do: network[pos][:left]
+  defp walk(network, pos, "R"), do: network[pos][:right]
 end
 
-Part1.parse(test_input)
+Part1.run(test_input)
 ```
 
 ## Test Part 1
@@ -88,7 +83,7 @@ defmodule PartOneTest do
 
   @input puzzle_input
 
-  @expected 55477
+  @expected 19783
 
   test "part one" do
     actual = Part1.run(@input)
@@ -103,4 +98,4 @@ ExUnit.run()
 Part1.run(puzzle_input)
 ```
 
-<!-- livebook:{"offset":1770,"stamp":{"token":"XCP.yYAa0zbw1ulOwyBM1dSGdKTZd9V-gffmeiPPB3sIb3GfVWBHRO4eepIf_6GTwKnKkPguJMsN77cuix-uFOeUapOKOKgOYe5DkUM0xp_4mW3q7atQRYo","version":2}} -->
+<!-- livebook:{"offset":1840,"stamp":{"token":"XCP.aO9KLxTVaJX0wj9m2Heszsm3u_Ub2BGk_xVC-NPw8wBqxSvQN1REW24oNt4yw3avN4zupTcyQnOI6zkUIZAItFVaz-khororEwUg4r0XaBW6-X99vDU","version":2}} -->
