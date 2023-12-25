@@ -34,15 +34,15 @@ ZZZ = (ZZZ, ZZZ)
 |> String.slice(1..-2)
 ```
 
-## Parser
+## Part 1
 
 ```elixir
-defmodule Parser do
+defmodule Part1 do
   def parse(input) do
-    [turns, nodes] = String.split(input, "\n\n")
+    [instructions, nodes] = String.split(input, "\n\n")
 
-    steps =
-      turns
+    instructions =
+      instructions
       |> String.graphemes()
       |> Enum.map(fn direction ->
         case direction do
@@ -55,77 +55,27 @@ defmodule Parser do
       nodes
       |> String.split("\n", trim: true)
       |> Enum.map(&String.split(&1, " = "))
-      |> Enum.map(fn [step, coordites] = _line ->
+      |> Enum.map(fn [step, coordites] ->
         {step, coordites |> String.slice(1..-2) |> String.split(", ")}
       end)
       |> Enum.into(%{})
 
-    _walk =
-      network
-      |> Enum.reduce({0, steps}, fn
-        {"ZZZ", [_left, _right]}, acc ->
-          acc
-        {"AAA", [left, right]}, {counter, [step | rest]} = _acc ->
-            
-          {1, }
-        {step, [left, right]}, {counter, [step | rest]} = _acc ->
-          Map.get(network, )
-          {counter + 1, rest}
-      end)
+    {instructions, network}
   end
-end
 
-Parser.parse(test_input)
-```
+  def walk(_instructions, _network, [], "FFF", count), do: count
 
-## Test Parser
-
-```elixir
-ExUnit.start(autorun: false)
-
-defmodule ParserTest do
-  use ExUnit.Case, async: true
-  import Parser
-  @expected 2
-
-  test "parse test" do
-    test_input = """
-    RL
-
-    AAA = (BBB, CCC)
-    BBB = (DDD, EEE)
-    CCC = (ZZZ, GGG)
-    DDD = (DDD, DDD)
-    EEE = (EEE, EEE)
-    GGG = (GGG, GGG)
-    ZZZ = (ZZZ, ZZZ)
-    """
-
-    actual = parse(test_input)
-    assert actual == @expected
-  end
-end
-
-ExUnit.run()
-```
-
-## Part 1
-
-```elixir
-defmodule PartOne do
-  def solve(input) do
-    IO.puts("--- Part One ---")
-    IO.puts("Result: #{run(input)}")
+  def walk(_instructions, _network, [], key, ) do
+    
   end
 
   def run(input) do
-    input
-    |> String.split("\n", trim: true)
-    |> Enum.map(&String.trim/1)
-    |> Enum.map(&Parser.parse/1)
-    |> Enum.sum()
+    {instructions, network} = parse(input)
+    walk(instructions, network, [], "AAA", 0)
   end
 end
+
+Part1.parse(test_input)
 ```
 
 ## Test Part 1
@@ -135,14 +85,13 @@ ExUnit.start(autorun: false)
 
 defmodule PartOneTest do
   use ExUnit.Case, async: true
-  import PartOne
 
   @input puzzle_input
 
   @expected 55477
 
   test "part one" do
-    actual = run(@input)
+    actual = Part1.run(@input)
     assert actual == @expected
   end
 end
@@ -151,47 +100,7 @@ ExUnit.run()
 ```
 
 ```elixir
-PartOne.solve(puzzle_input)
+Part1.run(puzzle_input)
 ```
 
-## Part 2
-
-```elixir
-defmodule PartTwo do
-  def solve(input) do
-    IO.puts("--- Part One ---")
-    IO.puts("Result: #{run(input)}")
-  end
-
-  def run(input) do
-    input
-    |> String.split("\n", trim: true)
-    |> Enum.map(&String.trim/1)
-    |> Enum.map(&Parser.parse_two/1)
-    |> Enum.sum()
-  end
-end
-```
-
-## Test Part 2
-
-```elixir
-ExUnit.start(autorun: false)
-
-defmodule PartTwoTest do
-  use ExUnit.Case, async: true
-  import PartTwo
-
-  @input puzzle_input
-  @expected 54431
-
-  test "part two" do
-    actual = run(@input)
-    assert actual == @expected
-  end
-end
-
-ExUnit.run()
-```
-
-<!-- livebook:{"offset":3185,"stamp":{"token":"XCP.OLr3KeJ2gbtb-2W2wpYRNeIbrTvXFiquRK67ygzaNfvDsV4KePQJoYdatMpqi54ri0zNrig9MYu5DkWNgZa3x4dJHcgaGgi-FE4rwy0tG1xSgKw1Mz4","version":2}} -->
+<!-- livebook:{"offset":1770,"stamp":{"token":"XCP.yYAa0zbw1ulOwyBM1dSGdKTZd9V-gffmeiPPB3sIb3GfVWBHRO4eepIf_6GTwKnKkPguJMsN77cuix-uFOeUapOKOKgOYe5DkUM0xp_4mW3q7atQRYo","version":2}} -->
