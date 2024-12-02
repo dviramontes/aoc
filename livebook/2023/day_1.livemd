@@ -8,7 +8,7 @@ Mix.install([
 
 ## Input
 
-<!-- livebook:{"attrs":{"assign_to":"puzzle_input","day":"1","session_secret":"AOC_SESSION","year":"2023"},"chunks":null,"kind":"Elixir.KinoAOC.HelperCell","livebook_object":"smart_cell"} -->
+<!-- livebook:{"attrs":"eyJhc3NpZ25fdG8iOiJwdXp6bGVfaW5wdXQiLCJkYXkiOiIxIiwic2Vzc2lvbl9zZWNyZXQiOiJBT0NfU0VTU0lPTiIsInllYXIiOiIyMDIzIn0","chunks":null,"kind":"Elixir.KinoAOC.HelperCell","livebook_object":"smart_cell"} -->
 
 ```elixir
 {:ok, puzzle_input} =
@@ -194,4 +194,4 @@ end
 ExUnit.run()
 ```
 
-<!-- livebook:{"offset":3317,"stamp":{"token":"XCP.tkST5awSgcthxn7xP7BKr6zgsZpmvcDp9Zh4iobYMIt7-ACv093P3MCLWf8PNP6kSVbxzj2AwxVYY5JSSu4FGY6PRnjDS-Kbf1wxTcykc35XpWrzA8o","version":2}} -->
+<!-- livebook:{"offset":3347,"stamp":{"token":"XCP.3EYyddLd7PnCKTx-b8D_Sb1INowwknCnaZ5iNQ_CPRZs9TleUc1aTYJ8qiqwvs7fvQYyHyMnRfnObTWt_KeJM2fDoS9uLL_g-2M5kpqeLMLlKlTVO7A","version":2}} -->
