@@ -84,25 +84,39 @@ defmodule PartOne do
   end
 
   def run(input) do
-   reports = RowParser.parse(input)
-
-   reports
+   input
+   |> RowParser.parse()
    |> Enum.map(&evaluate_report/1)
-    
+   |> Enum.count(&(&1 == true))
   end
 
   def evaluate_report(report) do
-    report = Enum.chunk_every(report, 2, 1, :discard)
-    dbg(report)
-    report
-    |> Enum.map(fn a, b -> abs(a - b) end)
-    |> Enum.all?(&diff/1)
+    levels = report
+    |> Enum.chunk_every(2, 1, :discard)
+
+    in_range = levels
+    |> Enum.map(&diff/1)
+    |> Enum.all?(&in_range/1)
+
+    all_positive = levels
+    |> Enum.map(&diff/1)
+    |> Enum.all?(&positive/1)
+
+
+    all_negative = levels
+    |> Enum.map(&diff/1)
+    |> Enum.all?(&negative/1)
+
+    in_range && all_positive || in_range && all_negative
   end
 
-  def diff(3), do: true
-  def diff(2), do: true
-  def diff(1), do: true
-  def diff(_), do: false
+  def diff([a, b]), do: a - b
+
+  def in_range(n), do: abs(n) in 1..3
+
+  def positive(n), do: n > 0
+  
+  def negative(n), do: n < 0
 end
 
 PartOne.run(test_input)
@@ -115,12 +129,12 @@ PartOne.run(test_input)
 ExUnit.start(autorun: false)
 
 defmodule PartOneTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case
 
   @input puzzle_input
   
   test "part one" do
-    assert PartOne.run(@input) == 1388114
+    assert PartOne.run(@input) == 591
   end
 end
 
@@ -137,16 +151,7 @@ defmodule PartTwo do
   end
 
   def run(input) do
-   %{left: left, right: right} = input
-    |> RowParser.parse()
-
-   f_map = Enum.frequencies(right) 
-
-    left
-    |> Enum.map(fn num -> 
-      num * Map.get(f_map, num, 0)
-    end)
-    |> Enum.sum()
+  
   end
 end
 
@@ -159,18 +164,15 @@ PartTwo.solve(puzzle_input)
 ExUnit.start(autorun: false)
 
 defmodule PartTwoTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case
   import PartTwo
 
-  @input puzzle_input
-  @expected 23529853
-
   test "part two" do
-    assert run(@input) == @expected
+    assert run(puzzle_input) == 23529853
   end
 end
 
 ExUnit.run()
 ```
 
-<!-- livebook:{"offset":2734,"stamp":{"token":"XCP.7F2xEQmS_YdXjKWvS68C2bnjqu22_znjjSEL7p5DqUfntN-LBsN6XyqgV4yotFzaPm2kBHPwHQHS61CfuzRio0MlD_tOCxaFrlVLf8QckgIWxXxWWtl6ceTzYmak1Ovkb-8","version":2}} -->
+<!-- livebook:{"offset":2725,"stamp":{"token":"XCP.vxvc5Iu_lzoziLK-WWK1-i5t3nVbWVVR6kEglGKcm1-atT7UuB3kT8Pswc9lNfn4D-OPmCD3cpEKb1lG1hvYY9qKazAtJJpSXD6ryaEV51s6OaWGMk_JxyvcYUKqSA3N4XM","version":2}} -->
