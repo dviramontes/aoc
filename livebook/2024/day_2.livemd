@@ -19,12 +19,12 @@ Mix.install([
 
 ```elixir
 test_input = """
-7 6 4 2 1
-1 2 7 8 9
-9 7 6 2 1
-1 3 2 4 5
-8 6 4 4 1
-1 3 6 7 9
+  7 6 4 2 1
+  1 2 7 8 9
+  9 7 6 2 1
+  1 3 2 4 5
+  8 6 4 4 1
+  1 3 6 7 9
 """
 ```
 
@@ -102,7 +102,6 @@ defmodule PartOne do
     |> Enum.map(&diff/1)
     |> Enum.all?(&positive/1)
 
-
     all_negative = levels
     |> Enum.map(&diff/1)
     |> Enum.all?(&negative/1)
@@ -150,12 +149,51 @@ defmodule PartTwo do
     IO.puts("Result: #{run(input)}")
   end
 
-  def run(input) do
-  
+ def run(input) do
+   input
+   |> RowParser.parse()
+   |> Enum.map(&evaluate_report/1)
+   |> Enum.count(&(&1 == true))
   end
+
+  def evaluate_report(report) do
+    levels = report
+    |> Enum.chunk_every(2, 1, :discard)
+
+    in_range = levels
+    |> Enum.map(&diff/1)
+    |> Enum.all?(&in_range/1)
+  
+    positive_count = levels
+    |> Enum.map(&diff/1)
+    |> Enum.count(&positive/1)
+
+    negative_count = levels
+    |> Enum.map(&diff/1)
+    |> Enum.count(&negative/1)
+
+    zero_count = levels
+    |> Enum.map(&diff/1)
+    |> Enum.count(&zero/1)
+
+    in_range || (zero_count == 1 || positive_count == 1 || negative_count == 1)
+  end
+
+  def diff([a, b]), do: a - b
+
+  def in_range(n), do: abs(n) in 1..3
+
+  def positive(n), do: n > 0
+  
+  def negative(n), do: n < 0
+
+  def zero(n), do: n == 0 
 end
 
-PartTwo.solve(puzzle_input)
+test_input
+# puzzle_input
+# "8 6 4 4 1"
+|> PartTwo.run()
 ```
 
 ## part 2 - test
@@ -165,14 +203,15 @@ ExUnit.start(autorun: false)
 
 defmodule PartTwoTest do
   use ExUnit.Case
-  import PartTwo
+
+   @input puzzle_input
 
   test "part two" do
-    assert run(puzzle_input) == 23529853
+    assert PartTwo.run(@input) == 858
   end
 end
 
 ExUnit.run()
 ```
 
-<!-- livebook:{"offset":2725,"stamp":{"token":"XCP.vxvc5Iu_lzoziLK-WWK1-i5t3nVbWVVR6kEglGKcm1-atT7UuB3kT8Pswc9lNfn4D-OPmCD3cpEKb1lG1hvYY9qKazAtJJpSXD6ryaEV51s6OaWGMk_JxyvcYUKqSA3N4XM","version":2}} -->
+<!-- livebook:{"offset":3533,"stamp":{"token":"XCP.jxX42beHlM-BQLhrp54XKLXz1Z5lO_h6J7aaeO5-Qty-s84-fDqhaDQvhwvNJpqn6JHH5Rg8P3Jl9YLsA3dCGrDPT6wKXnBZLjAl1ASYY3uXg35eKnlJR2OtvP-4zfPVgao","version":2}} -->
