@@ -1,4 +1,4 @@
-# Day 2
+# Day 3
 
 ```elixir
 Mix.install([
@@ -8,44 +8,48 @@ Mix.install([
 
 ## Input
 
-<!-- livebook:{"attrs":"eyJhc3NpZ25fdG8iOiJwdXp6bGVfaW5wdXQiLCJkYXkiOiIyIiwic2Vzc2lvbl9zZWNyZXQiOiJTRVNTSU9OIiwieWVhciI6IjIwMjQifQ","chunks":null,"kind":"Elixir.KinoAOC.HelperCell","livebook_object":"smart_cell"} -->
+<!-- livebook:{"attrs":"eyJhc3NpZ25fdG8iOiJwdXp6bGVfaW5wdXQiLCJkYXkiOiIzIiwic2Vzc2lvbl9zZWNyZXQiOiJTRVNTSU9OIiwieWVhciI6IjIwMjQifQ","chunks":null,"kind":"Elixir.KinoAOC.HelperCell","livebook_object":"smart_cell"} -->
 
 ```elixir
 {:ok, puzzle_input} =
-  KinoAOC.download_puzzle("2024", "2", System.fetch_env!("LB_SESSION"))
+  KinoAOC.download_puzzle("2024", "3", System.fetch_env!("LB_SESSION"))
 ```
 
 ## test input
 
 ```elixir
 test_input = """
-  7 6 4 2 1
-  1 2 7 8 9
-  9 7 6 2 1
-  1 3 2 4 5
-  8 6 4 4 1
-  1 3 6 7 9
+xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))
 """
 ```
 
-## parser
+## Token parser
 
 ```elixir
-defmodule RowParser do
+defmodule Token do
+  defstruct [:literal, :type] 
+
   def parse(input) do
    input
-    |> String.split("\n", trim: true)
-    |> Stream.map(&String.trim_leading/1)
-    |> Stream.map(fn str -> 
-      str
-      |> String.split()
-      |> Enum.map(&String.to_integer/1)
-    end)
-    |> Enum.to_list()
+    |> String.split(~r{(\n\r|\r\n)}, trim: true)
+    |> Enum.flat_map(&tokenize/1)
+    |> Enum.map(fn line -> 
+        line
+        |> String.replace("mul(", "")
+        |> String.replace(")", "")
+        |> String.split(",")
+        |> Enum.map(&String.to_integer/1)
+      end)
+  end
+
+  def tokenize(input) do
+    ~r/mul\(\d+,\d+\)/
+    |> Regex.scan(input)
+    |> List.flatten()
   end
 end
 
-RowParser.parse(test_input)
+Token.parse(test_input)
 ```
 
 ## test parser
@@ -53,21 +57,15 @@ RowParser.parse(test_input)
 ```elixir
 ExUnit.start(autorun: false)
 
-defmodule RowParserTest do
+defmodule TokenTest do
   use ExUnit.Case, async: true
 
   @test_input """
-  7 6 4 2 1
-  1 2 7 8 9
-  9 7 6 2 1
-  1 3 2 4 5
-  8 6 4 4 1
-  1 3 6 7 9
+  xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))
   """
 
   test "row parse test" do
-    assert RowParser.parse(@test_input) |> Enum.at(0) == [7, 6, 4, 2, 1]
-    assert RowParser.parse(@test_input) |> Enum.at(5) == [1, 3, 6, 7, 9]
+    assert Token.parse(@test_input) == [[2, 4], [5, 5], [11,8], [8, 5]]
   end
 end
 
@@ -85,46 +83,22 @@ defmodule PartOne do
 
   def run(input) do
    input
-   |> RowParser.parse()
-   |> Enum.map(&evaluate_report/1)
-   |> Enum.count(&(&1 == true))
+   |> Token.parse()
+   |> eval()
   end
 
-  def evaluate_report(report) do
-    levels = report
-    |> Enum.chunk_every(2, 1, :discard)
-
-    in_range = levels
-    |> Enum.map(&diff/1)
-    |> Enum.all?(&in_range/1)
-
-    all_positive = levels
-    |> Enum.map(&diff/1)
-    |> Enum.all?(&positive/1)
-
-    all_negative = levels
-    |> Enum.map(&diff/1)
-    |> Enum.all?(&negative/1)
-
-    in_range && all_positive || in_range && all_negative
+  def eval(expression) do
+   Enum.reduce(expression, 0, fn [a, b], acc -> 
+      (a * b) + acc
+    end) 
   end
-
-  def diff([a, b]), do: a - b
-
-  def in_range(n), do: abs(n) in 1..3
-
-  def positive(n), do: n > 0
-  
-  def negative(n), do: n < 0
 end
 
-PartOne.run(test_input)
+# test_input
+puzzle_input
+|> PartOne.run()
 
 ```
-
-<!-- livebook:{"branch_parent_index":4} -->
-
-## Section
 
 ## part 1 - test
 
@@ -137,7 +111,7 @@ defmodule PartOneTest do
   @input puzzle_input
   
   test "part one" do
-    assert PartOne.run(@input) == 591
+    assert PartOne.run(@input) == 187833789
   end
 end
 
@@ -147,7 +121,6 @@ ExUnit.run()
 ## part 2
 
 ```elixir
-
 defmodule PartTwo do
   def run(input) do
     input
@@ -215,4 +188,4 @@ end
 ExUnit.run()
 ```
 
-<!-- livebook:{"offset":3634,"stamp":{"token":"XCP.NwOc2jGlhOHHGgA_8nL5MhGEhUq_CWbV0caTLFaSZ9PkQ7jQ2gJHgPMAPPOgu0r3fo9S8ERxl8x1sC2iIdP6P4g5nBm-WMT0-Moz1lRFNTKPVfxaSFF6CtDRmDMeg0heroM","version":2}} -->
+<!-- livebook:{"offset":3244,"stamp":{"token":"XCP.z06RB0MlWelC1FD6f4uHC5F89QCfapI93-ipxpYM1AHcvZnytGUR1xO3jy9dvaHMIONsFIKsgTyEfW24cbup4kyiL6PaS-lEx1a3CFvZtSkIZgEEL8NlmBEBa0n6febV9L8","version":2}} -->
