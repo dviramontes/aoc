@@ -19,7 +19,7 @@ Mix.install([
 
 ```elixir
 test_input = """
-xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))
+xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))
 """
 ```
 
@@ -27,29 +27,49 @@ xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))
 
 ```elixir
 defmodule Token do
-  defstruct [:literal, :type] 
-
   def parse(input) do
-   input
-    |> String.split(~r{(\n\r|\r\n)}, trim: true)
-    |> Enum.flat_map(&tokenize/1)
-    |> Enum.map(fn line -> 
-        line
-        |> String.replace("mul(", "")
-        |> String.replace(")", "")
-        |> String.split(",")
-        |> Enum.map(&String.to_integer/1)
-      end)
+    input
+    |> tokenize()
+    |> Enum.reduce(0, fn [a, b], acc ->
+      acc + String.to_integer(a) * String.to_integer(b)
+    end)
   end
 
   def tokenize(input) do
-    ~r/mul\(\d+,\d+\)/
-    |> Regex.scan(input)
-    |> List.flatten()
+    ~r/mul\((\d+),(\d+)\)/
+    |> Regex.scan(input, capture: :all_but_first)
+    # |> IO.inspect(chars: :as_list)
   end
 end
 
-Token.parse(test_input)
+test_input
+|> Token.parse()
+```
+
+```elixir
+defmodule TokenTwo do
+  def parse(input, enable \\ :enable, acc \\ 0)
+
+  def parse(input, :enable, acc) do
+    Regex.split(~r/don't\(\)/, input, parts: 2)
+    |> case do
+      [valid, rest] -> parse(rest, :disable, acc + Token.parse(valid))
+      [valid] -> acc + Token.parse(valid)
+    end
+  end
+
+  def parse(input, :disable, acc) do
+    Regex.split(~r/do\(\)/, input, parts: 2)
+    |> case do
+      [_invalid, rest] -> parse(rest, :enable, acc)
+      [_invalid] -> acc
+    end
+  end
+end
+
+test_input
+# puzzle_input
+|> TokenTwo.parse()
 ```
 
 ## test parser
@@ -61,11 +81,11 @@ defmodule TokenTest do
   use ExUnit.Case, async: true
 
   @test_input """
-  xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))
+  xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))
   """
 
-  test "row parse test" do
-    assert Token.parse(@test_input) == [[2, 4], [5, 5], [11,8], [8, 5]]
+  test "tokenize" do
+    assert Token.tokenize(@test_input) == [["2", "4"], ["5", "5"], ["11", "8"], ["8", "5"]]
   end
 end
 
@@ -82,22 +102,13 @@ defmodule PartOne do
   end
 
   def run(input) do
-   input
-   |> Token.parse()
-   |> eval()
-  end
-
-  def eval(expression) do
-   Enum.reduce(expression, 0, fn [a, b], acc -> 
-      (a * b) + acc
-    end) 
+    Token.parse(input)
   end
 end
 
-# test_input
-puzzle_input
+test_input
+# puzzle_input
 |> PartOne.run()
-
 ```
 
 ## part 1 - test
@@ -109,9 +120,9 @@ defmodule PartOneTest do
   use ExUnit.Case
 
   @input puzzle_input
-  
+
   test "part one" do
-    assert PartOne.run(@input) == 187833789
+    assert PartOne.run(@input) == 187_833_789
   end
 end
 
@@ -122,47 +133,14 @@ ExUnit.run()
 
 ```elixir
 defmodule PartTwo do
+  def solve(input) do
+    IO.puts("--- Part Two ---")
+    IO.puts("Result: #{run(input)}")
+  end
+
   def run(input) do
-    input
-    |> RowParser.parse()
-    |> Enum.map(&evaluate_report/1)
-    |> Enum.count(&(&1 == true))
+    TokenTwo.parse(input)
   end
-
-  def evaluate_report(report) do
-    if valid_sequence?(report) do
-      true
-    else
-      # Try removing each number to see if it makes sequence valid
-      0..(length(report) - 1)
-      |> Enum.any?(fn index ->
-        report
-        |> List.delete_at(index)
-        |> valid_sequence?()
-      end)
-    end
-  end
-
-  def valid_sequence?(report) do
-    diff = 
-    report 
-    |> Enum.chunk_every(2, 1, :discard)
-    |> Enum.map(&diff/1)
-
-    all_valid = Enum.all?(diff, &valid_diff?/1)
-
-    cond do
-      Enum.empty?(diff) -> false
-        not all_valid -> false 
-        Enum.all?(diff, &(&1 > 0)) -> true # all increasing
-          Enum.all?(diff, &(&1 < 0)) -> true # all decreasing
-          true -> false   
-    end    
-  end
-  
-  def diff([a, b]), do: b - a
-  
-  def valid_diff?(diff), do: abs(diff) in 1..3
 end
 
 # test_input
@@ -178,14 +156,14 @@ ExUnit.start(autorun: false)
 defmodule PartTwoTest do
   use ExUnit.Case
 
-   @input puzzle_input
+  @input puzzle_input
 
   test "part two" do
-    assert PartTwo.run(@input) == 621
+    assert PartTwo.run(@input) == 94_455_185
   end
 end
 
 ExUnit.run()
 ```
 
-<!-- livebook:{"offset":3244,"stamp":{"token":"XCP.z06RB0MlWelC1FD6f4uHC5F89QCfapI93-ipxpYM1AHcvZnytGUR1xO3jy9dvaHMIONsFIKsgTyEfW24cbup4kyiL6PaS-lEx1a3CFvZtSkIZgEEL8NlmBEBa0n6febV9L8","version":2}} -->
+<!-- livebook:{"offset":2750,"stamp":{"token":"XCP.mXEUhuXGyyeedLDe8GSUp3D1IBZ_C6WcKyFoPuAPQ4b7kWVexqRbk0KQbilJbzoV-Cs7HPaAZwWI0FAwuDLV43_XHgnRp2gE83D0JS_8BQi0taZQhgbJmXTvCxJclEqb9C4","version":2}} -->
